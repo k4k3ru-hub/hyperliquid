@@ -7,8 +7,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/k4k3ru-hub/hyperliquid-sdk-go/constant"
-	"github.com/k4k3ru-hub/hyperliquid-sdk-go/rest"
+	"github.com/k4k3ru-hub/hyperliquid/constant"
+	"github.com/k4k3ru-hub/hyperliquid/rest"
 )
 
 

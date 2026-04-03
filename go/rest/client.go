@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/k4k3ru-hub/hyperliquid-sdk-go/constant"
+	"github.com/k4k3ru-hub/hyperliquid/constant"
 )
 
 

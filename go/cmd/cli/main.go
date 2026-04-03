@@ -6,8 +6,8 @@ package main
 import (
 	"fmt"
 
-	myCliRestAllMids          "github.com/k4k3ru-hub/hyperliquid-sdk-go/cli/rest/all_mids"
-	myCliRestMetaAndAssetCtxs "github.com/k4k3ru-hub/hyperliquid-sdk-go/cli/rest/meta_and_asset_ctxs"
+	myCliRestAllMids          "github.com/k4k3ru-hub/hyperliquid/go/cli/rest/all_mids"
+	myCliRestMetaAndAssetCtxs "github.com/k4k3ru-hub/hyperliquid/go/cli/rest/meta_and_asset_ctxs"
 
 	"github.com/k4k3ru-hub/cli-go"
 )

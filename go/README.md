@@ -1,6 +1,6 @@
 # Hyperliquid SDK for Go
 
-[![License](https://img.shields.io/github/license/k4k3ru-hub/hyperliquid-sdk-go)](./LICENSE)
+[![License](https://img.shields.io/github/license/k4k3ru-hub/hyperliquid/go)](./LICENSE)
 
 This is a Go library for interacting with Hyperliquid, providing convenient utilities for developers building applications with Hyperliquid's API.
 
@@ -17,8 +17,8 @@ This is a Go library for interacting with Hyperliquid, providing convenient util
 ### CLI
 
 ```
-git clone https://github.com/k4k3ru-hub/hyperliquid-sdk-go.git
-cd hyperliquid-sdk-go
+git clone https://github.com/k4k3ru-hub/hyperliquid.git
+cd hyperliquid/go
 go build -o build/hyperliquid-cli cli/main.go
 ls -l build/hyperliquid-cli
 ```
@@ -26,7 +26,7 @@ ls -l build/hyperliquid-cli
 ### Module
 
 ```
-import "github.com/k4k3ru-hub/hyperliquid-sdk-go"
+import "github.com/k4k3ru-hub/hyperliquid/go"
 ```
 
 
@@ -54,13 +54,13 @@ The SDK can also be imported and used as a Go module.
 1. Install the package
 
 ```
-go get github.com/k4k3ru-hub/hyperliquid-sdk-go
+go get github.com/k4k3ru-hub/hyperliquid/go
 ```
 
 2. Import the package for the function you want to use.
 
 - REST:
-  - metaAndAssetCtxs: `import "github.com/k4k3ru-hub/hyperliquid-sdk-go/rest/info/meta_and_asset_ctxs"`
+  - metaAndAssetCtxs: `import "github.com/k4k3ru-hub/hyperliquid/go/rest/info/meta_and_asset_ctxs"`
 
 3. Initialize the client for the function you want to use.
 

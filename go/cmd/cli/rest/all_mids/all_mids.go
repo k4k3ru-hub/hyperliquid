@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	myRestInfoAllMids "github.com/k4k3ru-hub/hyperliquid-sdk-go/rest/info/all_mids"
+	myRestInfoAllMids "github.com/k4k3ru-hub/hyperliquid/rest/info/all_mids"
 
 	"github.com/k4k3ru-hub/cli-go"
 )
