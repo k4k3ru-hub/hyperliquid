@@ -7,79 +7,168 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+    "fmt"
 	"io"
+	"net"
 	"net/http"
 	"time"
 
-	"github.com/k4k3ru-hub/hyperliquid/constant"
+    myRestDTO                  "github.com/k4k3ru-hub/hyperliquid/go/rest/dto"
+    myRestInfoAllMids          "github.com/k4k3ru-hub/hyperliquid/go/rest/info/all_mids"
+    myRestInfoMeta             "github.com/k4k3ru-hub/hyperliquid/go/rest/info/meta"
+    myRestInfoMetaAndAssetCtxs "github.com/k4k3ru-hub/hyperliquid/go/rest/info/meta_and_asset_ctxs"
+    myRestInfoSpotMeta         "github.com/k4k3ru-hub/hyperliquid/go/rest/info/spot_meta"
 )
 
 
 type Client struct {
-	EndpointUrl string
-	HttpClient *http.Client
-	HttpMethod string
-	*RequestBody
-	TimeoutSecond time.Duration
-}
-type RequestBody struct {
-    Type string `json:"type"`
-	User string `json:"user,omitempty"`
+	httpClient *http.Client
+	endpointURL string
+	httpMethod string
+    httpHeader http.Header
+    body *myRestDTO.RequestBody
 }
 
+//
+// Parameters:
+//   - ConnectTimeout: Timeout for establishing the connection.
+//
+type ClientOption struct {
+    ConnectTimeout time.Duration
+}
+
+
+//
+// Get default client option.
+//
+// Version:
+//   - 2026-04-04: Added.
+//
+func DefaultClientOption() *ClientOption {
+    return &ClientOption{
+        ConnectTimeout: 3 * time.Second,
+    }
+}
 
 //
 // New Client.
 //
-func NewClient() *Client {
+// Version:
+//   - 2026-04-04: Added.
+//
+func NewClient(o *ClientOption) *Client {
+    // Guard.
+    if o == nil {
+        o = DefaultClientOption()
+    }
+
 	return &Client{
-		HttpClient: &http.Client{
-			Timeout: 10 * time.Second,
-		},
+        httpClient: &http.Client{
+            Transport: &http.Transport{
+                DialContext: (&net.Dialer{
+                    Timeout: o.ConnectTimeout,
+                }).DialContext,
+            },
+        },
 	}
+}
+
+
+func (c *Client) InfoAllMids() (*myRestInfoAllMids.Client, error) {
+    return myRestInfoAllMids.NewClient(c)
+}
+
+
+func (c *Client) InfoMeta() (*myRestInfoMeta.Client, error) {
+    return myRestInfoMeta.NewClient(c)
+}
+
+
+func (c *Client) InfoMetaAndAssetCtxs() (*myRestInfoMetaAndAssetCtxs.Client, error) {
+    return myRestInfoMetaAndAssetCtxs.NewClient(c)
+}
+
+
+func (c *Client) InfoSpotMeta() (*myRestInfoSpotMeta.Client, error) {
+    return myRestInfoSpotMeta.NewClient(c)
+}
+
+
+func (c *Client) SetBody(body *myRestDTO.RequestBody) {
+    c.body = body
+}
+
+func (c *Client) SetEndpointURL(endpointURL string) {
+    c.endpointURL = endpointURL
+}
+
+func (c *Client) SetHttpMethod(method string) {
+    c.httpMethod = method
+}
+
+func (c *Client) SetHttpHeader(header http.Header) {
+    c.httpHeader = header
 }
 
 
 //
 // Send a request.
 //
-func (c *Client) Send() ([]byte, error) {
-	// Set context.
-	ctx := context.Background()
-	var cancel context.CancelFunc
-	if c.TimeoutSecond != 0 {
-		ctx, cancel = context.WithTimeout(context.Background(), c.TimeoutSecond*time.Second)
-		defer cancel()
-	}
+// Version:
+//   - 2026-04-04: Added.
+//
+func (c *Client) Send(ctx context.Context) ([]byte, error) {
+    // Guard.
+    if ctx == nil {
+	    ctx = context.Background()
+    }
+    if c.endpointURL == "" {
+        return nil, fmt.Errorf("failed to send request: missing required value: endpoint_url=null")
+    }    
+    if c.httpMethod == "" {
+        return nil, fmt.Errorf("failed to send request: missing required value: http_method=null")
+    }
+    if len(c.httpHeader) == 0 {
+        return nil, fmt.Errorf("failed to send request: missing required value: http_header=null")
+    }
+
+    endpointURL := c.endpointURL
+    httpMethod := c.httpMethod
 
 	// Set request body.
 	var reqBody io.Reader
-	if c.RequestBody != nil {
-		byteBody, err := json.Marshal(*c.RequestBody)
+	if c.body != nil {
+		byteBody, err := json.Marshal(*c.body)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to send request: %w", err)
 		}
 		reqBody = bytes.NewBuffer(byteBody)
 	}
 
 	// Set Request.
-	req, err := http.NewRequestWithContext(ctx, c.HttpMethod, c.EndpointUrl, reqBody)
+	req, err := http.NewRequestWithContext(ctx, httpMethod, endpointURL, reqBody)
 	if err != nil {
 		return nil, err
 	}
 
-	// Set `Content-Type` header.
-	req.Header.Set("Content-Type", constant.ContentTypeJson)
+	// Set HTTP header.
+    if len(c.httpHeader) > 0 {
+        for k, v := range c.httpHeader {
+            copied := make([]string, len(v))
+            copy(copied, v)
+            req.Header[k] = copied
+        }
+    }
 
-	resp, err := c.HttpClient.Do(req)
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 	return body, nil
 }

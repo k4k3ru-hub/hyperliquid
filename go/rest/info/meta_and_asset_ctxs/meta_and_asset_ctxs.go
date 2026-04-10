@@ -4,11 +4,13 @@
 package meta_and_asset_ctxs
 
 import (
+    "context"
 	"encoding/json"
+    "fmt"
 	"net/http"
 
-	"github.com/k4k3ru-hub/hyperliquid/constant"
-	"github.com/k4k3ru-hub/hyperliquid/rest"
+    myConstant "github.com/k4k3ru-hub/hyperliquid/go/constant"
+    myRestDTO "github.com/k4k3ru-hub/hyperliquid/go/rest/dto"
 )
 
 
@@ -22,7 +24,11 @@ type MetaAndAssetCtxs struct {
 	Assets   []*AssetEntry    `json:"assets"`
 }
 type Client struct {
-	*rest.Client
+    parent      ParentClient
+    endpointURL string
+    httpMethod  string
+    reqBody     *myRestDTO.RequestBody
+    httpHeader  http.Header
 }
 type UniverseEntry struct {
 	Name         string `json:"name"`
@@ -42,28 +48,41 @@ type AssetEntry struct {
 	PrevDayPx    string   `json:"prevDayPx"`
 }
 
+type ParentClient interface {
+    SetEndpointURL(endpointURL string)
+    SetHttpMethod(method string)
+    SetHttpHeader(header http.Header)
+    SetBody(body *myRestDTO.RequestBody)
+    Send(context.Context) ([]byte, error)
+}
+
 
 //
 // New Client.
 //
-func NewClient() *Client {
-	// New Client.
-	client := rest.NewClient()
+func NewClient(parentClient ParentClient) (*Client, error) {
+    // Guard.
+    if parentClient == nil {
+        return nil, fmt.Errorf("failed to create client: missing required value: parent_client=null.")
+    }
 
-	// Set Endpoint URL.
-	client.EndpointUrl = constant.BaseUrlRest + constant.ApiEndpointInfo
-
-	// Set HTTP method.
-	client.HttpMethod = http.MethodPost
-
-	// Set RequestBody.
-	client.RequestBody = &rest.RequestBody{
+    // Create request body.
+    reqBody := &myRestDTO.RequestBody{
         Type: TypeValue,
     }
 
-	return &Client{
-		Client: client,
-	}
+    // Create http header.
+    httpHeader := http.Header{
+        "Content-Type": {myConstant.ContentTypeJson},
+    }
+
+    return &Client{
+        parent: parentClient,
+        endpointURL: myConstant.BaseUrlRest + myConstant.ApiEndpointInfo,
+        httpMethod: http.MethodPost,
+        reqBody: reqBody,
+        httpHeader: httpHeader,
+    }, nil
 }
 
 
@@ -88,9 +107,15 @@ func (object *MetaAndAssetCtxs) GetAssetByName(name string) *AssetEntry {
 //
 // Send a request.
 //
-func (c *Client) Send() (*MetaAndAssetCtxs, error) {
+func (c *Client) Send(ctx context.Context) (*MetaAndAssetCtxs, error) {
+    // Set date to parent client.
+    c.parent.SetEndpointURL(c.endpointURL)
+    c.parent.SetHttpMethod(c.httpMethod)
+    c.parent.SetHttpHeader(c.httpHeader)
+    c.parent.SetBody(c.reqBody)
+
 	// Send a request.
-	resBody, err := c.Client.Send()
+    resBody, err := c.parent.Send(ctx)
 	if err != nil {
 		return nil, err
 	}

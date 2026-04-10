@@ -1,7 +1,7 @@
 //
-// all_mids.go
+// meta.go
 //
-package all_mids
+package meta
 
 import (
     "context"
@@ -18,7 +18,7 @@ const (
     OptionNameToken = "token"
     OptionAliasToken = "t"
 
-	ReqBodyType = "allMids"
+	ReqBodyType = "meta"
 )
 
 
@@ -26,18 +26,18 @@ const (
 // Run.
 //
 func Run(options map[string]*cli.Option) {
-	fmt.Printf("Started rest allMids command.\n")
+	fmt.Printf("Starting rest meta command.\n")
 
     // Create client.
     opt := myRest.DefaultClientOption()
-    restInfoAllMidsClient, err := myRest.NewClient(opt).InfoAllMids()
+    restInfoMetaClient, err := myRest.NewClient(opt).InfoMeta()
     if err != nil {
         fmt.Printf("%s\n", err.Error())
         return
     }
 
 	// Send API request.
-	result, err := restInfoAllMidsClient.Send(context.Background())
+	result, err := restInfoMetaClient.Send(context.Background())
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
@@ -50,16 +50,35 @@ func Run(options map[string]*cli.Option) {
     }
 
 	// Set data.
-	headers := []string{"Token", "Mid"}
+    fmt.Printf("[Universe]\n")
+	headers := []string{"name", "szDecimals", "maxLeverage"}
 	var data [][]interface{}
-	for _, allMid := range result {
-		if token == "" || strings.ToUpper(token) == allMid.Token {
-			data = append(data, []interface{}{allMid.Token, allMid.Mid})
+	for _, item := range result.Universe {
+		if token == "" || strings.ToUpper(token) == item.Name {
+			data = append(data, []interface{}{
+                item.Name,
+                item.SzDecimals,
+                item.MaxLeverage,
+            })
 		}
 	}
 
 	// Output
 	cli.OutputTable(headers, data)
+
+    fmt.Printf("\n[marginTables]\n")
+    headers = []string{"id", "description", "marginTiers"}
+    data = [][]interface{}{}
+    for _, item := range result.MarginTables {
+        data = append(data, []interface{}{
+            item.ID,
+            item.Table.Description,
+            item.Table.MarginTiers,
+        })
+    }
+
+    // Output
+    cli.OutputTable(headers, data)
 }
 
 

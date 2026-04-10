@@ -4,11 +4,12 @@
 package meta_and_asset_ctxs
 
 import (
+    "context"
 	"fmt"
 	"strconv"
 	"strings"
 
-	myRestInfoMetaAndAssetCtxs "github.com/k4k3ru-hub/hyperliquid/rest/info/meta_and_asset_ctxs"
+	myRest "github.com/k4k3ru-hub/hyperliquid/go/rest"
 
 	"github.com/k4k3ru-hub/cli-go"
 )
@@ -28,9 +29,16 @@ const (
 func Run(options map[string]*cli.Option) {
 	fmt.Printf("Started rest metaAndAssetCtxs command.\n")
 
+    // Create client.
+    opt := myRest.DefaultClientOption()
+    restInfoInfoMetaAndAssetCtxsClient, err := myRest.NewClient(opt).InfoMetaAndAssetCtxs()
+    if err != nil {
+        fmt.Printf("%s\n", err.Error())
+        return
+    }
+
 	// Send API request.
-	c := myRestInfoMetaAndAssetCtxs.NewClient()
-    result, err := c.Send()
+    result, err := restInfoInfoMetaAndAssetCtxsClient.Send(context.Background())
     if err != nil {
         fmt.Printf("%s\n", err)
         return

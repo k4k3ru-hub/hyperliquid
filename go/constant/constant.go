@@ -14,7 +14,7 @@ const (
 
 	BaseUrlRest      = "https://api.hyperliquid.xyz"
 	BaseUrlExchange  = "https://api.hyperliquid.xyz"
-	BaseUrlWebsocket = "https://api.hyperliquid.xyz"
+	BaseUrlWebsocket = "wss://api.hyperliquid.xyz"
 
 	ContentTypeJson = "application/json"
 )

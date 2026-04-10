@@ -4,12 +4,14 @@
 package all_mids
 
 import (
+    "context"
 	"encoding/json"
+    "fmt"
 	"net/http"
 	"sort"
 
-	"github.com/k4k3ru-hub/hyperliquid/constant"
-	"github.com/k4k3ru-hub/hyperliquid/rest"
+	myConstant "github.com/k4k3ru-hub/hyperliquid/go/constant"
+	myRestDTO "github.com/k4k3ru-hub/hyperliquid/go/rest/dto"
 )
 
 
@@ -17,45 +19,74 @@ const (
 	TypeValue = "allMids"
 )
 
+type Client struct {
+    parent      ParentClient
+    endpointURL string
+    httpMethod  string
+    httpHeader  http.Header
+    reqBody     *myRestDTO.RequestBody
+}
+
 type AllMid struct {
 	Token string `json:"token"`
 	Mid   string `json:"mid"`
 }
-type Client struct {
-    *rest.Client
+
+type ParentClient interface {
+    SetEndpointURL(endpointURL string)
+    SetHttpMethod(method string)
+    SetHttpHeader(header http.Header)
+    SetBody(body *myRestDTO.RequestBody)
+    Send(context.Context) ([]byte, error)
 }
 
 
 //
 // New Client.
 //
-func NewClient() *Client {
-	// New Client.
-	client := rest.NewClient()
+func NewClient(parentClient ParentClient) (*Client, error) {
+    // Guard.
+    if parentClient == nil {
+        return nil, fmt.Errorf("failed to create client: missing required value: parent_client=null.")
+    }
 
-	// Set Endpoint URL.
-	client.EndpointUrl = constant.BaseUrlRest + constant.ApiEndpointInfo
+    // Create request body.
+    reqBody := &myRestDTO.RequestBody{
+        Type: TypeValue,
+    }
 
-	// Set HTTP method.
-	client.HttpMethod = http.MethodPost
-
-	// Set RequestBody.
-	client.RequestBody = &rest.RequestBody{
-		Type: TypeValue,
-	}
+    // Create http header.
+    httpHeader := http.Header{
+        "Content-Type": {myConstant.ContentTypeJson},
+    }
 
 	return &Client{
-		Client: client,
-	}
+        parent: parentClient,
+		endpointURL: myConstant.BaseUrlRest + myConstant.ApiEndpointInfo,
+        httpMethod: http.MethodPost,
+        reqBody: reqBody,
+        httpHeader: httpHeader,
+	}, nil
+}
+
+
+func (c *Client) SetDEX(dex string) {
+    c.reqBody.DEX = dex
 }
 
 
 //
 // Send a request.
 //
-func (c *Client) Send() ([]*AllMid, error) {
+func (c *Client) Send(ctx context.Context) ([]*AllMid, error) {
+    // Set date to parent client.
+    c.parent.SetEndpointURL(c.endpointURL)
+    c.parent.SetHttpMethod(c.httpMethod)
+    c.parent.SetHttpHeader(c.httpHeader)
+    c.parent.SetBody(c.reqBody)
+
     // Send a request.
-    resBody, err := c.Client.Send()
+    resBody, err := c.parent.Send(ctx)
     if err != nil {
         return nil, err
     }
