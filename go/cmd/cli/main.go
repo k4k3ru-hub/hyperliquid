@@ -10,6 +10,8 @@ import (
 	myCliRestMeta             "github.com/k4k3ru-hub/hyperliquid/go/cmd/cli/rest/meta"
 	myCliRestMetaAndAssetCtxs "github.com/k4k3ru-hub/hyperliquid/go/cmd/cli/rest/meta_and_asset_ctxs"
 	myCliRestSpotMeta         "github.com/k4k3ru-hub/hyperliquid/go/cmd/cli/rest/spot_meta"
+	spotMetaAndAssetCtxs      "github.com/k4k3ru-hub/hyperliquid/go/cmd/cli/rest/spot_meta_and_asset_ctxs"
+	userFees                  "github.com/k4k3ru-hub/hyperliquid/go/cmd/cli/rest/user_fees"
     "github.com/k4k3ru-hub/hyperliquid/go/cmd/cli/websocket/l2book"
 
 	"github.com/k4k3ru-hub/cli-go"
@@ -54,6 +56,12 @@ func main() {
 
     // Add `rest spotMeta` command.
     myCliRestSpotMeta.SetCommand(restCommand)
+
+    // Add `rest spotMetaAndAssetCtxs` command.
+    spotMetaAndAssetCtxs.SetCommand(restCommand)
+
+    // Add `rest userFees` command.
+    userFees.SetCommand(restCommand)
 
     // Add `ws l2book` command.
     l2book.SetCommand(wsCommand)

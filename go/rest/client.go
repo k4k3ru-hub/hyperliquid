@@ -13,11 +13,13 @@ import (
 	"net/http"
 	"time"
 
-    myRestDTO                  "github.com/k4k3ru-hub/hyperliquid/go/rest/dto"
-    myRestInfoAllMids          "github.com/k4k3ru-hub/hyperliquid/go/rest/info/all_mids"
-    myRestInfoMeta             "github.com/k4k3ru-hub/hyperliquid/go/rest/info/meta"
-    myRestInfoMetaAndAssetCtxs "github.com/k4k3ru-hub/hyperliquid/go/rest/info/meta_and_asset_ctxs"
-    myRestInfoSpotMeta         "github.com/k4k3ru-hub/hyperliquid/go/rest/info/spot_meta"
+    dto                      "github.com/k4k3ru-hub/hyperliquid/go/rest/dto"
+    infoAllMids              "github.com/k4k3ru-hub/hyperliquid/go/rest/info/all_mids"
+    infoMeta                 "github.com/k4k3ru-hub/hyperliquid/go/rest/info/meta"
+    infoMetaAndAssetCtxs     "github.com/k4k3ru-hub/hyperliquid/go/rest/info/meta_and_asset_ctxs"
+    infoSpotMeta             "github.com/k4k3ru-hub/hyperliquid/go/rest/info/spot_meta"
+    infoSpotMetaAndAssetCtxs "github.com/k4k3ru-hub/hyperliquid/go/rest/info/spot_meta_and_asset_ctxs"
+    userFees                 "github.com/k4k3ru-hub/hyperliquid/go/rest/info/user_fees"
 )
 
 
@@ -26,7 +28,7 @@ type Client struct {
 	endpointURL string
 	httpMethod string
     httpHeader http.Header
-    body *myRestDTO.RequestBody
+    body *dto.RequestBody
 }
 
 //
@@ -74,27 +76,37 @@ func NewClient(o *ClientOption) *Client {
 }
 
 
-func (c *Client) InfoAllMids() (*myRestInfoAllMids.Client, error) {
-    return myRestInfoAllMids.NewClient(c)
+func (c *Client) InfoAllMids() (*infoAllMids.Client, error) {
+    return infoAllMids.NewClient(c)
 }
 
 
-func (c *Client) InfoMeta() (*myRestInfoMeta.Client, error) {
-    return myRestInfoMeta.NewClient(c)
+func (c *Client) InfoMeta() (*infoMeta.Client, error) {
+    return infoMeta.NewClient(c)
 }
 
 
-func (c *Client) InfoMetaAndAssetCtxs() (*myRestInfoMetaAndAssetCtxs.Client, error) {
-    return myRestInfoMetaAndAssetCtxs.NewClient(c)
+func (c *Client) InfoMetaAndAssetCtxs() (*infoMetaAndAssetCtxs.Client, error) {
+    return infoMetaAndAssetCtxs.NewClient(c)
 }
 
 
-func (c *Client) InfoSpotMeta() (*myRestInfoSpotMeta.Client, error) {
-    return myRestInfoSpotMeta.NewClient(c)
+func (c *Client) InfoSpotMeta() (*infoSpotMeta.Client, error) {
+    return infoSpotMeta.NewClient(c)
 }
 
 
-func (c *Client) SetBody(body *myRestDTO.RequestBody) {
+func (c *Client) InfoSpotMetaAndAssetCtxs() (*infoSpotMetaAndAssetCtxs.Client, error) {
+    return infoSpotMetaAndAssetCtxs.NewClient(c)
+}
+
+
+func (c *Client) InfoUserFees(user string) (*userFees.Client, error) {
+    return userFees.NewClient(c, user)
+}
+
+
+func (c *Client) SetBody(body *dto.RequestBody) {
     c.body = body
 }
 
