@@ -51,14 +51,14 @@ func Run(options map[string]*cli.Option) {
     }
 
     tokenHeaders := []string{
-	"Name",
-	"SzDecimals",
-	"WeiDecimals",
-	"Index",
-	"TokenID",
-	"IsCanonical",
-	"FullName",
-}
+        "Name",
+        "SzDecimals",
+        "WeiDecimals",
+        "Index",
+        "TokenID",
+        "IsCanonical",
+        "FullName",
+    }
 
 var tokenData [][]interface{}
 for _, tokenEntry := range result.Meta.Tokens {
@@ -86,6 +86,7 @@ cli.OutputTable(tokenHeaders, tokenData)
     // Set data.
     headers := []string{
         "Name",
+        "Symbol",
         "Tokens",
         "Index",
         "IsCanonical",
@@ -99,6 +100,7 @@ cli.OutputTable(tokenHeaders, tokenData)
 
     for _, universeEntry := range result.Meta.Universe {
         // Get symbol name.
+        var symbol string
         tokenName := universeEntry.Name
         tokenIndexes := make([]string, 0, len(universeEntry.Tokens))
         baseQuote := make([]string, 0, 2)
@@ -110,7 +112,7 @@ cli.OutputTable(tokenHeaders, tokenData)
             }
         }
         if len(baseQuote) == 2 {
-            tokenName = baseQuote[0] + "/" + baseQuote[1]
+            symbol = baseQuote[0] + "/" + baseQuote[1]
         }
 
         // Filter after tokenName is resolved.
@@ -134,6 +136,7 @@ cli.OutputTable(tokenHeaders, tokenData)
 
         rowData := []interface{}{
             tokenName,
+            symbol,
             strings.Join(tokenIndexes, ","),
             strconv.Itoa(universeEntry.Index),
             strconv.FormatBool(universeEntry.IsCanonical),

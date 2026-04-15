@@ -17,6 +17,11 @@ const (
 	BaseUrlWebsocket = "wss://api.hyperliquid.xyz"
 
 	ContentTypeJson = "application/json"
+
+    SignificantDigits = 5
+
+    PerpMaxDecimals = 6
+    SpotMaxDecimals = 8
 )
 
 
