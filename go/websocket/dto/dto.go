@@ -11,6 +11,7 @@ import (
 
 const (
     MethodSubscribe = "subscribe"
+    MethodUnsubscribe = "unsubscribe"
 
     SubscriptionTypeL2Book       = "l2Book"
     SubscriptionTypeNotification = "notification"

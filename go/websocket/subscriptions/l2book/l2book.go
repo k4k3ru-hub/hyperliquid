@@ -7,7 +7,6 @@ import (
     "context"
     "encoding/json"
     "fmt"
-    "log"
 
     myWebsocketDTO "github.com/k4k3ru-hub/hyperliquid/go/websocket/dto"
 )
@@ -19,8 +18,8 @@ type Client struct {
 
 
 type ParentClient interface {
-    Subscribe(context.Context, *myWebsocketDTO.SubscribeRequest, func([]byte)) error
-    Unsubscribe(context.Context, *myWebsocketDTO.SubscribeRequest) error
+    Subscribe(ctx context.Context, key string, payload []byte) error
+    Unsubscribe(ctx context.Context, key string, payload []byte) error
 }
 
 
@@ -37,9 +36,16 @@ func NewClient(parent ParentClient, coin myWebsocketDTO.Coin) (*Client, error) {
 }
 
 
-func (c *Client) Subscribe(ctx context.Context, handler func(*myWebsocketDTO.WsBook)) error {
+func (c *Client) Subscribe(ctx context.Context) error {
+    // Guard.
+    if c == nil {
+        return fmt.Errorf("failed to subscribe l2book: missing required value: client=null")
+    }
     if c.coin == "" {
         return fmt.Errorf("failed to subscribe l2book: missing required value: coin=null")
+    }
+    if c.parent == nil {
+        return fmt.Errorf("failed to subscribe l2book: missing required value: parent_client=null")
     }
 
     req := &myWebsocketDTO.SubscribeRequest{
@@ -50,24 +56,52 @@ func (c *Client) Subscribe(ctx context.Context, handler func(*myWebsocketDTO.WsB
         },
     }
 
-    return c.parent.Subscribe(ctx, req, func(data []byte) {
-        raw := &myWebsocketDTO.WsBookRaw{}
-        if err := json.Unmarshal(data, raw); err != nil {
-            log.Printf("[error] failed to receive l2book event: %w", err)
-            return
-        }
-        book := &myWebsocketDTO.WsBook{
-            Coin: raw.Coin,
-            Time: raw.Time,
-        }
-        if len(raw.Levels) > 0 {
-            book.Bids = raw.Levels[0]
-        }
-        if len(raw.Levels) > 1 {
-            book.Asks = raw.Levels[1]
-        }
-        handler(book)
-    })
+    // Build subscription key.
+    key, err := req.Subscription.BuildKey()
+    if err != nil {
+        return err
+    }
+
+    payload, err := json.Marshal(req)
+    if err != nil {
+        return fmt.Errorf("failed to send websocket json message: %w", err)
+    }
+
+    // Subscribe.
+    return c.parent.Subscribe(ctx, key, payload)
 }
 
 
+func (c *Client) Unsubscribe(ctx context.Context) error {
+    // Guard.
+    if c == nil {
+        return fmt.Errorf("failed to unsubscribe l2book: missing required value: client=null")
+    }
+    if c.coin == "" {
+        return fmt.Errorf("failed to unsubscribe l2book: missing required value: coin=null")
+    }
+    if c.parent == nil {
+        return fmt.Errorf("failed to unsubscribe l2book: missing required value: parent_client=null")
+    }
+
+    req := &myWebsocketDTO.SubscribeRequest{
+        Method: myWebsocketDTO.MethodUnsubscribe,
+        Subscription: myWebsocketDTO.Subscription{
+            Type: myWebsocketDTO.SubscriptionTypeL2Book,
+            Coin: string(c.coin),
+        },
+    }
+
+    // Build subscription key.
+    key, err := req.Subscription.BuildKey()
+    if err != nil {
+        return err
+    }
+
+    payload, err := json.Marshal(req)
+    if err != nil {
+        return fmt.Errorf("failed to send websocket json message: %w", err)
+    }
+
+    return c.parent.Unsubscribe(ctx, key, payload)
+}

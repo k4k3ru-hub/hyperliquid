@@ -2,3 +2,7 @@ github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aN
 github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/k4k3ru-hub/cli-go v0.0.0-20250317071451-c8b3c7187958 h1:OUIu2VouMnVCpW/633suSxYQJdx/dN9nh2ivij0xKaQ=
 github.com/k4k3ru-hub/cli-go v0.0.0-20250317071451-c8b3c7187958/go.mod h1:K6uUxRiyMbWRPjPULQ7KNMhmjAXafRAocEAjpoOTRoA=
+github.com/k4k3ru-hub/websocket/go v0.0.0-20260422141607-45d699969a10 h1:/1EHhLFv6sbNOlHD65/AHbAATZPlL61yu8yWn/ttEJ4=
+github.com/k4k3ru-hub/websocket/go v0.0.0-20260422141607-45d699969a10/go.mod h1:FnwpaDVPEmDRF6Mer6W8GVQYfYgNftnJXA0HAAPGHSg=
+github.com/k4k3ru-hub/websocket/go v0.0.0-20260423163855-37cf282077b7 h1:ibsyIpnxFvx6yG1w+gtSSNxBck69+jC8+XTWiS9+O9M=
+github.com/k4k3ru-hub/websocket/go v0.0.0-20260423163855-37cf282077b7/go.mod h1:FnwpaDVPEmDRF6Mer6W8GVQYfYgNftnJXA0HAAPGHSg=
