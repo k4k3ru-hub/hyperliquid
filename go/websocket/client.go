@@ -5,6 +5,7 @@ package websocket
 
 import (
 	"context"
+    "encoding/json"
     "fmt"
 	"time"
 
@@ -15,27 +16,11 @@ import (
 )
 
 const (
-	writeWait       = 10 * time.Second
-	pongWait        = 70 * time.Second
-	initialReadWait = pongWait
-	maxMessageSize  = 1024 * 1024 // 1MB
-	sendQueueSize   = 256
-
 	// Hyperliquid recommends sending { "method": "ping" } if the subscribed
 	// channel may be quiet for 60 seconds or more.
 	appPingPeriod = 25 * time.Second
 )
 
-
-//
-// AppPingRequest is the Hyperliquid websocket heartbeat request.
-//
-// Version:
-//   - 2026-04-06: Added.
-//
-type AppPingRequest struct {
-	Method string `json:"method"`
-}
 
 //
 // ClientOption.
@@ -82,12 +67,25 @@ func DefaultClientOption() *ClientOption {
 //   - 2026-04-06: Added.
 //
 func NewClient(ctx context.Context, endpointURL string, h SessionHandler, o *ClientOption) (*Client, error) {
+    // Guard.
     if h == nil {
         return nil, fmt.Errorf("failed to create client: missing required parameter: session_handler=null")
     }
 	if o == nil {
 		o = DefaultClientOption()
 	}
+
+    // Set ping payload.
+    if len(o.SessionOption.PingPayload) == 0 {
+        p := myWebsocketDTO.SubscribeRequest{
+            Method: myWebsocketDTO.MethodPing,
+        }
+        b, err := json.Marshal(p)
+        if err != nil {
+            return nil, fmt.Errorf("failed to create client: %w", err)
+        } 
+        o.SessionOption.PingPayload = b
+    }
 
     // Create new websocket client.
     wsClient, err := k4k3ruWebsocket.NewClient(ctx, endpointURL, h, o)

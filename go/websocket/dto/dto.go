@@ -10,12 +10,14 @@ import (
 )
 
 const (
+    MethodPing = "ping"
     MethodSubscribe = "subscribe"
     MethodUnsubscribe = "unsubscribe"
 
-    SubscriptionTypeL2Book       = "l2Book"
-    SubscriptionTypeNotification = "notification"
-    SubscriptionTypeWebData2     = "webData2"
+    SubscriptionTypeL2Book               = "l2Book"
+    SubscriptionTypeNotification         = "notification"
+    SubscriptionTypeWebData2             = "webData2"
+    SubscriptionTypeSubscriptionResponse = "subscriptionResponse"
 )
 
 type Coin string
@@ -97,7 +99,7 @@ func (e *Envelope) BuildKey() (string, error) {
 
 type SubscribeRequest struct {
     Method       string       `json:"method"`
-    Subscription Subscription `json:"subscription"`
+    Subscription Subscription `json:"subscription,omitempty"`
 }
 
 type Subscription struct {
